@@ -10,6 +10,7 @@ on:
       - 'ElderStandByApp/**'
       - 'ElderCalendarWidget/**'
       - 'Shared/**'
+      - 'ElderClock_AppIcon_1024.png'
       - '.github/workflows/build-ipa.yml'
 
 permissions:
@@ -41,6 +42,44 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY='' \
             build
+
+      - name: Add Elder Clock App Icon
+        run: |
+          set -euo pipefail
+
+          APP="build/Build/Products/Release-iphoneos/ElderStandBy.app"
+          ICON="ElderClock_AppIcon_1024.png"
+
+          test -d "$APP"
+          test -f "$ICON"
+
+          sips -s format png -z 120 120 "$ICON" \
+            --out "$APP/ElderClockIcon@2x.png"
+
+          sips -s format png -z 180 180 "$ICON" \
+            --out "$APP/ElderClockIcon@3x.png"
+
+          PLIST="$APP/Info.plist"
+
+          /usr/libexec/PlistBuddy -c \
+            "Add :CFBundleIcons dict" "$PLIST" || true
+
+          /usr/libexec/PlistBuddy -c \
+            "Add :CFBundleIcons:CFBundlePrimaryIcon dict" "$PLIST" || true
+
+          /usr/libexec/PlistBuddy -c \
+            "Add :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles array" \
+            "$PLIST" || true
+
+          /usr/libexec/PlistBuddy -c \
+            "Add :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles:0 string ElderClockIcon" \
+            "$PLIST" || true
+
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles:0 ElderClockIcon" \
+            "$PLIST"
+
+          echo "Elder Clock icon added successfully"
 
       - name: Package unsigned IPA
         run: |
