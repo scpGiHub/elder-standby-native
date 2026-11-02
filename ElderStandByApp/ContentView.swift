@@ -1,3 +1,4 @@
+
 import SwiftUI
 import UIKit
 
@@ -11,69 +12,103 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geometry in
             let landscape = geometry.size.width > geometry.size.height
+
             Group {
                 if landscape {
-                    HStack(spacing: 8) {
-                        clockPanel(landscape: true)
-                        calendarPanel(landscape: true)
+                    HStack(spacing: 6) {
+                        clockPanel()
+                        calendarPanel()
                     }
                 } else {
-                    VStack(spacing: 8) {
-                        clockPanel(landscape: false)
-                        calendarPanel(landscape: false)
+                    VStack(spacing: 6) {
+                        clockPanel()
+                        calendarPanel()
                     }
                 }
             }
-            .padding(8)
+            .padding(6)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Colors.background.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
     }
 
-    private func clockPanel(landscape: Bool) -> some View {
+    private func clockPanel() -> some View {
         GeometryReader { geometry in
             TimelineView(.periodic(from: .now, by: 1)) { timeline in
+                let large = min(
+                    geometry.size.width * 0.56,
+                    geometry.size.height * 0.80
+                )
+
                 Text(CalendarInfo.time(timeline.date))
-                    .font(.system(size: landscape
-                        ? min(geometry.size.width * 0.27, geometry.size.height * 0.43)
-                        : min(geometry.size.width * 0.21, geometry.size.height * 0.35),
-                                  weight: .heavy, design: .rounded))
+                    .font(.system(
+                        size: large,
+                        weight: .heavy,
+                        design: .rounded
+                    ))
                     .monospacedDigit()
-                    .minimumScaleFactor(0.5)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.42)
                     .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, 3)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity
+                    )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Colors.panel, in: RoundedRectangle(cornerRadius: 22))
+        .background(
+            Colors.panel,
+            in: RoundedRectangle(cornerRadius: 18)
+        )
     }
 
-    private func calendarPanel(landscape: Bool) -> some View {
+    private func calendarPanel() -> some View {
         GeometryReader { geometry in
             TimelineView(.periodic(from: .now, by: 60)) { timeline in
-                let base = min(geometry.size.width * (landscape ? 0.115 : 0.13),
-                               geometry.size.height * 0.21)
-                VStack(spacing: max(5, geometry.size.height * 0.025)) {
+                let large = min(
+                    geometry.size.width * 0.245,
+                    geometry.size.height * 0.31
+                )
+
+                VStack(spacing: max(3, geometry.size.height * 0.012)) {
                     Text(CalendarInfo.gregorian(timeline.date))
-                        .font(.system(size: base, weight: .heavy))
+                        .font(.system(size: large, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.38)
+
                     Text(CalendarInfo.weekday(timeline.date))
-                        .font(.system(size: base, weight: .heavy))
+                        .font(.system(size: large, weight: .heavy))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.38)
+
                     Text(CalendarInfo.lunar(timeline.date))
-                        .font(.system(size: base * 0.74, weight: .bold))
+                        .font(.system(size: large * 0.78, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.38)
                         .foregroundStyle(Colors.gold)
                 }
-                .lineLimit(1)
-                .minimumScaleFactor(0.45)
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 4)
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Colors.panel, in: RoundedRectangle(cornerRadius: 22))
+        .background(
+            Colors.panel,
+            in: RoundedRectangle(cornerRadius: 18)
+        )
     }
 }
 
